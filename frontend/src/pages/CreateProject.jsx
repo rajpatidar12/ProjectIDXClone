@@ -1,44 +1,57 @@
 import { Button, Layout } from "antd";
 import { useCreateProject } from "../hooks/apis/mutation/useCreateProject.js";
+import { useNavigate } from "react-router-dom";
 
 const headerStyle = {
   textAlign: "center",
   color: "#fff",
-  height: 64,
-  paddingInline: 48,
-  lineHeight: "64px",
+  height: 80,
+  lineHeight: "80px",
   backgroundColor: "#4096ff",
 };
 
 const contentStyle = {
   textAlign: "center",
-  minHeight: 120,
-  lineHeight: "120px",
+  flex: 1,
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
   color: "#fff",
   backgroundColor: "#0958d9",
 };
 
-const footerStyle = {
-  textAlign: "center",
-  color: "#fff",
-  backgroundColor: "#4096ff",
-};
+// const footerStyle = {
+//   textAlign: "center",
+//   color: "#fff",
+//   height: 60,
+//   lineHeight: "60px",
+//   backgroundColor: "#4096ff",
+// };
 
 const layoutStyle = {
-  borderRadius: 8,
+  height: "100vh",
+  width: "100vw",
+  margin: 0,
+  padding: 0,
+  display: "flex",
+  flexDirection: "column",
   overflow: "hidden",
-  width: "calc(50% - 8px)",
-  maxWidth: "calc(50% - 8px)",
+  boxSizing: "border-box",
 };
+
 export const CreateProject = () => {
-  const { Header, Footer, Content } = Layout;
+  const { Header } = Layout;
 
   const { createProjectMutation, isPending } = useCreateProject();
+
+  const navigate = useNavigate();
+
   async function handleCreateProject() {
     console.log("going to trigger the api");
     try {
-      await createProjectMutation();
+      const response = await createProjectMutation();
       console.log("Now we should redirect to the api");
+      navigate(`/project/${response.data}`);
     } catch (error) {
       console.log("error creating project", error);
     }
@@ -46,9 +59,6 @@ export const CreateProject = () => {
   return (
     <Layout style={layoutStyle}>
       <Header style={headerStyle}>
-        <h1>Create Project</h1>
-      </Header>
-      <Content style={contentStyle}>
         <Button
           type="default"
           onClick={handleCreateProject}
@@ -56,8 +66,11 @@ export const CreateProject = () => {
         >
           Create Project
         </Button>
-      </Content>
-      <Footer style={footerStyle}>Footer</Footer>
+      </Header>
+      {/* <Content style={contentStyle}>
+        
+      </Content> */}
+      {/* <Footer style={footerStyle}>Footer</Footer> */}
     </Layout>
   );
 };
