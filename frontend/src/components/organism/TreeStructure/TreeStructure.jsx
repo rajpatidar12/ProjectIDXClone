@@ -12,7 +12,6 @@ export const TreeStructure = () => {
   }, [setTreeStructure, treeStructure]);
   return (
     <div>
-      <h1>Tree Structure</h1>
       <TreeNode fileFolderData={treeStructure} />
     </div>
   );
