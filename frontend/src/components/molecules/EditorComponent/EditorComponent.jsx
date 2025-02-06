@@ -1,14 +1,17 @@
 import Editor from "@monaco-editor/react";
 import { useEffect, useState } from "react";
-import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
 import { useActiveFileTabStore } from "../../../store/activeFileTabStore.js";
+import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
+
 export const EditorComponent = () => {
+  let timerId = null;
   const [editorState, setEditorState] = useState({
     theme: null,
   });
 
+  const { activeFileTab } = useActiveFileTabStore();
   const { editorSocket } = useEditorSocketStore();
-  const { activeFileTab, setActiveFileTab } = useActiveFileTabStore();
+
   async function downloadTheme() {
     const response = await fetch("/Dracula.json");
     const data = await response.json();
@@ -21,10 +24,19 @@ export const EditorComponent = () => {
     monaco.editor.setTheme("dracula");
   }
 
-  editorSocket?.on("readFileSuccess", (data) => {
-    console.log("Read File data", data);
-    setActiveFileTab(data.path, data.value);
-  });
+  function handleChange(value) {
+    if (timerId !== null) {
+      clearTimeout(timerId);
+    }
+    timerId = setTimeout(() => {
+      const editorContent = value;
+      console.log("sending the writefile event");
+      editorSocket.emit("writeFile", {
+        data: editorContent,
+        pathToFileOrFolder: activeFileTab.path,
+      });
+    }, 2000);
+  }
 
   useEffect(() => {
     downloadTheme();
@@ -42,6 +54,7 @@ export const EditorComponent = () => {
             fontSize: 18,
             fontFamily: "monospace",
           }}
+          onChange={handleChange}
           value={
             activeFileTab?.value
               ? activeFileTab.value

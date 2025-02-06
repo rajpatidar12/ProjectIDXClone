@@ -6,6 +6,7 @@ import { Server } from "socket.io";
 import { createServer } from "node:http";
 import chokidar from "chokidar";
 import { handleEditorSocketEvents } from "./socketHandlers/editorHandler.js";
+
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -22,16 +23,20 @@ app.use(cors());
 io.on("connection", (socket) => {
   console.log("a user connected");
 });
+
 app.use("/api", apiRouter);
 app.get("/ping", (req, res) => {
   res.send("pong");
 });
 
 const editorNamespace = io.of("/editor");
+
 editorNamespace.on("connection", (socket) => {
   console.log("editor connected");
+
   let projectId = socket.handshake.query["projectId"];
   console.log("projectId received after backend", projectId);
+
   if (projectId) {
     var watcher = chokidar.watch(`./projects/${projectId}`, {
       ignored: (path) => path.includes("node_modules"),
@@ -41,18 +46,15 @@ editorNamespace.on("connection", (socket) => {
         ignoreInitial: true,
       },
     });
+
     watcher.on("all", (event, path) => {
-      // console.log(event, path);
+      console.log(event, path);
     });
   }
 
-  handleEditorSocketEvents(socket);
-
-  socket.on("disconnect", async () => {
-    await watcher.close();
-    console.log("editor disconnected");
-  });
+  handleEditorSocketEvents(socket, editorNamespace);
 });
+
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
 });
