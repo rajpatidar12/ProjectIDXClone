@@ -1,10 +1,12 @@
 import fs from "fs/promises";
+import path from "path";
+
 export const handleEditorSocketEvents = (socket, editorNamespace) => {
   socket.on("writeFile", async ({ data, pathToFileOrFolder }) => {
     try {
-      const response = await fs.writeFile(pathToFileOrFolder, data);
+      await fs.writeFile(pathToFileOrFolder, data);
       editorNamespace.emit("writeFileSuccess", {
-        data: "File written succesfully",
+        data: "File written successfully",
         path: pathToFileOrFolder,
       });
     } catch (error) {
@@ -14,24 +16,25 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
       });
     }
   });
+
   socket.on("createFile", async ({ pathToFileOrFolder }) => {
-    const isFileAlreadyPresent = await fs.stat(pathToFileOrFolder);
-    if (isFileAlreadyPresent) {
+    try {
+      await fs.access(pathToFileOrFolder);
       socket.emit("error", {
         data: "File already exists",
       });
-      return;
-    }
-    try {
-      const response = await fs.writeFile(pathToFileOrFolder, "");
-      socket.emit("createFileSuccess", {
-        data: "File created successfuly",
-      });
     } catch (error) {
-      console.log("Error creating the file");
-      socket.emit("error", {
-        data: "Error creating the file",
-      });
+      try {
+        await fs.writeFile(pathToFileOrFolder, "");
+        socket.emit("createFileSuccess", {
+          data: "File created successfully",
+        });
+      } catch (writeError) {
+        console.log("Error creating the file", writeError);
+        socket.emit("error", {
+          data: "Error creating the file",
+        });
+      }
     }
   });
 
@@ -50,9 +53,10 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
       });
     }
   });
+
   socket.on("deleteFile", async ({ pathToFileOrFolder }) => {
     try {
-      const response = await fs.unlink(pathToFileOrFolder);
+      await fs.unlink(pathToFileOrFolder);
       socket.emit("deleteFileSuccess", {
         data: "File deleted successfully",
       });
@@ -63,6 +67,7 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
       });
     }
   });
+
   socket.on("createFolder", async ({ pathToFileOrFolder }) => {
     try {
       await fs.mkdir(pathToFileOrFolder, { recursive: true });
@@ -76,16 +81,60 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
       });
     }
   });
+
   socket.on("deleteFolder", async ({ pathToFileOrFolder }) => {
     try {
-      const response = await fs.rmdir(pathToFileOrFolder, { recursive: true });
-      socket.emit("deleteFoldersuccess", {
-        data: "Folder deleted succesasfully",
+      const resolvedPath = path.resolve(pathToFileOrFolder);
+
+      try {
+        await fs.access(resolvedPath);
+      } catch (error) {
+        console.error("Folder does not exist:", resolvedPath);
+        socket.emit("deleteFolderError", {
+          data: "Folder does not exist",
+        });
+        return;
+      }
+
+      await fs.rm(resolvedPath, { recursive: true, force: true });
+
+      socket.emit("deleteFolderSuccess", {
+        data: "Folder deleted successfully",
       });
     } catch (error) {
-      console.log("Error deleting the folder", error);
-      socket.emit("error", {
+      console.error("Error deleting the folder:", error);
+      socket.emit("deleteFolderError", {
         data: "Error deleting the folder",
+        error: error.message,
+      });
+    }
+  });
+
+  socket.on("renameFolder", async ({ oldPath, newPath }) => {
+    try {
+      const resolvedOldPath = path.resolve(oldPath);
+      const resolvedNewPath = path.resolve(newPath);
+
+      try {
+        await fs.access(resolvedOldPath);
+      } catch (error) {
+        console.error("Folder does not exist:", resolvedOldPath);
+        socket.emit("renameFolderError", {
+          data: "Folder does not exist",
+        });
+        return;
+      }
+
+      await fs.rename(resolvedOldPath, resolvedNewPath);
+
+      socket.emit("renameFolderSuccess", {
+        data: "Folder renamed successfully",
+      });
+    } catch (error) {
+      console.error("Error renaming the folder:", error);
+      socket.emit("renameFolderError", {
+        data: "Error renaming the folder",
+        error: error.message,
       });
     }
   });

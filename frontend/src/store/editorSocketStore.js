@@ -33,7 +33,11 @@ export const useEditorSocketStore = create((set) => ({
       projectTreeStructureSetter();
     });
 
-    incomingSocket?.on("createFileSuccess", (data) => {
+    incomingSocket?.on("createFileSuccess", () => {
+      projectTreeStructureSetter();
+    });
+
+    incomingSocket?.on("renameFolderSuccess", () => {
       projectTreeStructureSetter();
     });
 

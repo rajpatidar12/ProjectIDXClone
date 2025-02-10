@@ -28,7 +28,7 @@ export const FolderContextMenu = ({ x, y, path }) => {
   function handleFolderDelete(e) {
     e.preventDefault();
     console.log("Deleting folder:", path);
-    editorSocket.emit("deleteFolder", { pathToFileorFlder: path });
+    editorSocket.emit("deleteFolder", { pathToFileOrFolder: path });
     setIsOpen(false);
   }
 
@@ -49,7 +49,10 @@ export const FolderContextMenu = ({ x, y, path }) => {
     pathParts[pathParts.length - 1] = newName.trim();
     const newPath = pathParts.join("\\");
     console.log("Renaming folder from:", path, "to:", newPath);
-    editorSocket.emit("rename", { oldPath: path, newPath: newPath });
+
+    // ✅ Corrected to "renameFolder" event
+    editorSocket.emit("renameFolder", { oldPath: path, newPath: newPath });
+
     setIsRenaming(false);
     setIsOpen(false);
   }
@@ -83,10 +86,10 @@ export const FolderContextMenu = ({ x, y, path }) => {
     const newPath = `${path}\\${newName.trim()}`;
     if (isCreatingFile) {
       console.log("Creating file at:", newPath);
-      editorSocket.emit("createFile", { pathToFileorFlder: newPath });
+      editorSocket.emit("createFile", { pathToFileOrFolder: newPath });
     } else if (isCreatingFolder) {
       console.log("Creating folder at:", newPath);
-      editorSocket.emit("createFolder", { pathToFileorFlder: newPath });
+      editorSocket.emit("createFolder", { pathToFileOrFolder: newPath });
     }
     handleCancel();
     setIsOpen(false);
