@@ -65,21 +65,21 @@ export const handleEditorSocketEvents = (socket, editorNamespace) => {
   });
   socket.on("createFolder", async ({ pathToFileOrFolder }) => {
     try {
-      const response = await fs.mkdir(pathToFileOrFolder);
+      await fs.mkdir(pathToFileOrFolder, { recursive: true });
       socket.emit("createFolderSuccess", {
         data: "Folder created successfully",
       });
     } catch (error) {
-      console.log("Error creating the Folder", error);
-      console.emit("error", {
-        data: "Error creating the Folder",
+      console.log("Error creating the folder:", error);
+      socket.emit("error", {
+        data: "Error creating the folder",
       });
     }
   });
   socket.on("deleteFolder", async ({ pathToFileOrFolder }) => {
     try {
       const response = await fs.rmdir(pathToFileOrFolder, { recursive: true });
-      socket.emit("deleteFOldersuccess", {
+      socket.emit("deleteFoldersuccess", {
         data: "Folder deleted succesasfully",
       });
     } catch (error) {

@@ -3,6 +3,7 @@ import { IoIosArrowDown, IoIosArrowForward } from "react-icons/io";
 import { FileIcon } from "../../atoms/FileIcon/FileIcon.jsx";
 import { useEditorSocketStore } from "../../../store/editorSocketStore.js";
 import { useFileContextMenuStore } from "../../../store/fileContextMenuStore.jsx";
+import { useFolderContextMenuStore } from "../../../store/folderContextMenuStore.js";
 
 export const TreeNode = ({ fileFolderData }) => {
   const [visibility, setVisibility] = useState({});
@@ -16,6 +17,13 @@ export const TreeNode = ({ fileFolderData }) => {
     setY: setFileContextMenuY,
   } = useFileContextMenuStore();
 
+  const {
+    setFolder,
+    setIsOpen: setFolderContextMenuIsOpen,
+    setX: setFolderContextMenuX,
+    setY: setFolderContextMenuY,
+  } = useFolderContextMenuStore();
+
   function toggleVisibility(name) {
     setVisibility({
       ...visibility,
@@ -27,9 +35,17 @@ export const TreeNode = ({ fileFolderData }) => {
     const names = fileFolderData.name.split(".");
     return names[names.length - 1];
   }
+
   function handleDoubleClick(fileFolderData) {
     console.log("Double clicked", fileFolderData);
     editorSocket.emit("readFile", {
+      pathToFileOrFolder: fileFolderData.path,
+    });
+  }
+
+  function handleDoubleClickFolder(fileFolderData) {
+    console.log("Double clicked on folder", fileFolderData);
+    editorSocket.emit("openFolder", {
       pathToFileOrFolder: fileFolderData.path,
     });
   }
@@ -41,6 +57,15 @@ export const TreeNode = ({ fileFolderData }) => {
     setFileContextMenuX(e.clientX);
     setFileContextMenuY(e.clientY);
     setFileContextMenuIsOpen(true);
+  }
+
+  function handleContextMenuForFolders(e, path) {
+    e.preventDefault();
+    console.log("Right clicked on folder", path);
+    setFolder(path);
+    setFolderContextMenuX(e.clientX);
+    setFolderContextMenuY(e.clientY);
+    setFolderContextMenuIsOpen(true);
   }
 
   if (!fileFolderData) {
@@ -57,6 +82,10 @@ export const TreeNode = ({ fileFolderData }) => {
       {fileFolderData.children ? (
         <button
           onClick={() => toggleVisibility(fileFolderData.name)}
+          onDoubleClick={() => handleDoubleClickFolder(fileFolderData)}
+          onContextMenu={(e) =>
+            handleContextMenuForFolders(e, fileFolderData.path)
+          }
           style={{
             border: "none",
             cursor: "pointer",
