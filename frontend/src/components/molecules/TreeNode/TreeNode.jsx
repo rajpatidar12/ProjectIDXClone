@@ -92,8 +92,9 @@ export const TreeNode = ({ fileFolderData }) => {
             outline: "none",
             color: "white",
             backgroundColor: "transparent",
-            paddingTop: "15px",
+            padding: "15px",
             fontSize: "16px",
+            margin: "10px",
           }}
         >
           {visibility[fileFolderData.name] ? (
@@ -114,7 +115,8 @@ export const TreeNode = ({ fileFolderData }) => {
 
           <p
             style={{
-              paddingTop: "5px",
+              margin: "10px",
+              padding: "5px",
               fontSize: "15px",
               cursor: "pointer",
               marginLeft: "5px",
