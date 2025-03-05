@@ -4,6 +4,8 @@
     RUN useradd -ms /bin/bash sandbox
 
     #Setup working directory
+    RUN mkdir -p /home/sandbox/app
+
     WORKDIR /home/sandbox
 
     # update the ubuntu machine 
@@ -14,7 +16,7 @@
 
     # install nodejs
 
-    RUN curl -fsSL https://deb.nodesource.com/setup_19.x | bash - && apt-get install -y nodejs
+    RUN curl -fsSL https://deb.nodesource.com/setup_22.x | bash - && apt-get install -y nodejs
 
     # configuring the terminal to display the current working directory
     RUN echo "PS1='\w'" >> /home/sandbox/.bashrc

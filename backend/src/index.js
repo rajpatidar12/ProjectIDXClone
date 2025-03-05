@@ -7,7 +7,8 @@ import { createServer } from "node:http";
 import chokidar from "chokidar";
 import { handleEditorSocketEvents } from "./socketHandlers/editorHandler.js";
 import { handleContainerCreate } from "./containers/handleContainerCreate.js";
-
+import { WebSocketServer } from "ws";
+import { handleTerminalCreation } from "./containers/handleTerminalCreation.js";
 const app = express();
 const server = createServer(app);
 const io = new Server(server, {
@@ -53,25 +54,41 @@ editorNamespace.on("connection", (socket) => {
     });
   }
 
+  socket.on("getPort", () => {
+    console.log("getPort event received");
+  });
+
   handleEditorSocketEvents(socket, editorNamespace);
-});
-
-const terminalNamespace = io.of("/terminal");
-
-terminalNamespace.on("connection", (socket) => {
-  console.log("terminal connected");
-  let projectId = socket.handshake.query["projectId"];
-
-  socket.on("shell-input", (data) => {
-    terminalNamespace.emit("shell-output", data);
-  });
-
-  socket.on("disconnet", () => {
-    console.log("terminal disconnected");
-  });
-  handleContainerCreate(projectId, socket);
 });
 
 server.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);
+});
+
+const webSocketForTerminal = new WebSocketServer({
+  noServer: true,
+});
+
+server.on("upgrade", (req, tcp, head) => {
+  const isTerminal = req.url.includes("/terminal");
+  if (isTerminal) {
+    console.log("req url received", req.url);
+    const projectId = req.url.split("=")[1];
+    console.log("projectId received after connection", projectId);
+
+    handleContainerCreate(projectId, webSocketForTerminal, req, tcp, head);
+  }
+});
+webSocketForTerminal.on("connection", (ws, req, container) => {
+  // console.log("terminal connected", ws, req, container);
+  handleTerminalCreation(container, ws);
+
+  ws.on("close", () => {
+    container.remove({ force: true }, (err, data) => {
+      if (err) {
+        console.log("Error while removing the container", err);
+      }
+      console.log("Container removed successfully", data);
+    });
+  });
 });
