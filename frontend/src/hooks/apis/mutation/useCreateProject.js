@@ -1,18 +1,19 @@
 import { useMutation } from "@tanstack/react-query";
-import { createProjectApi } from "../../../apis/projects.js";
+import { createprojectApi } from "../projects.js";
+
 export const useCreateProject = () => {
   const { mutateAsync, isPending, isSuccess, error } = useMutation({
-    mutationFn: createProjectApi,
+    mutationFn: createprojectApi,
     onSuccess: (data) => {
-      console.log("Project created succesfully", data);
+      console.log("project crteated succesfully", data);
     },
-    onError: () => {
-      console.log("Error creating project");
+    onError: (error) => {
+      console.log("error", error);
     },
   });
 
   return {
-    createProjectMutation: mutateAsync,
+    createProjectMutuation: mutateAsync,
     isPending,
     isSuccess,
     error,

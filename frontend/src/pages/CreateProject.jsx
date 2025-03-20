@@ -1,76 +1,64 @@
-import { Button, Layout } from "antd";
-import { useCreateProject } from "../hooks/apis/mutation/useCreateProject.js";
 import { useNavigate } from "react-router-dom";
+import { useCreateProject } from "../hooks/apis/mutation/useCreateProject.js";
+import { FaPlusCircle } from "react-icons/fa";
+import "./CreateProject.css";
 
-const headerStyle = {
-  textAlign: "center",
-  color: "#fff",
-  height: 80,
-  lineHeight: "80px",
-  backgroundColor: "#4096ff",
-};
-
-const contentStyle = {
-  textAlign: "center",
-  flex: 1,
-  display: "flex",
-  justifyContent: "center",
-  alignItems: "center",
-  color: "#fff",
-  backgroundColor: "#0958d9",
-};
-
-// const footerStyle = {
-//   textAlign: "center",
-//   color: "#fff",
-//   height: 60,
-//   lineHeight: "60px",
-//   backgroundColor: "#4096ff",
-// };
-
-const layoutStyle = {
-  height: "100vh",
-  width: "100vw",
-  margin: 0,
-  padding: 0,
-  display: "flex",
-  flexDirection: "column",
-  overflow: "hidden",
-  boxSizing: "border-box",
-};
-
-export const CreateProject = () => {
-  const { Header } = Layout;
-
-  const { createProjectMutation, isPending } = useCreateProject();
-
+export const Createproject = () => {
+  const { createProjectMutuation, isPending, isSuccess } = useCreateProject();
   const navigate = useNavigate();
 
   async function handleCreateProject() {
-    console.log("going to trigger the api");
+    console.log("triggerapi");
     try {
-      const response = await createProjectMutation();
-      console.log("Now we should redirect to the api");
+      const response = await createProjectMutuation();
+      console.log("move to editor");
       navigate(`/project/${response.data}`);
     } catch (error) {
-      console.log("error creating project", error);
+      console.log(error);
     }
   }
+
   return (
-    <Layout style={layoutStyle}>
-      <Header style={headerStyle}>
-        <Button
-          type="default"
-          onClick={handleCreateProject}
-          loading={isPending}
-        >
-          Create Project
-        </Button>
-      </Header>
-      {/* <Content style={contentStyle}>
-        
-      </Content> */}
-      {/* <Footer style={footerStyle}>Footer</Footer> */}
-    </Layout>
+    <div className="container">
+      <div className="gradient-bg"></div>
+
+      <div className="wrapper">
+        <div className="card">
+          <h1 className="card-title">
+            <span className="react-logo">
+              <img
+                src="https://upload.wikimedia.org/wikipedia/commons/a/a7/React-icon.svg"
+                alt="React Logo"
+                className="react-icon"
+              />
+            </span>
+            Create Your Project
+          </h1>
+          <p className="card-description">Start building your next big idea.</p>
+          <button
+            onClick={handleCreateProject}
+            className="btn"
+            disabled={isPending}
+            aria-label="Create a new project"
+          >
+            {isPending ? (
+              "Creating..."
+            ) : (
+              <>
+                <FaPlusCircle /> Create Project
+              </>
+            )}
+          </button>
+          {isPending && (
+            <p className="status pending">Creating your project...</p>
+          )}
+          {isSuccess && (
+            <p className="status success">Project Created Successfully!</p>
+          )}
+        </div>
+      </div>
+    </div>
   );
 };
+
+export default Createproject;
