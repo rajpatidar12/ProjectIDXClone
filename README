@@ -2,3 +2,28 @@
 ![Project Screenshot](https://github.com/rajpatidar12/ProjectIDXClone/blob/main/assets/images/screenshot-2025-03-211.png?raw=true)
 
 
+🚀 ProjectIDXClone - Cloning & Setup Guide
+Follow these steps to clone and set up the project on your local machine.
+
+📥 1️⃣ Clone the Repository
+sh
+git clone 
+cd ProjectIDXClone
+⚙️ 2️⃣ Setup Backend
+Navigate to the backend folder and install dependencies:
+
+
+cd backend
+npm install
+
+🐳docker build -t <your-image-name> .
+🎨 3️⃣ Setup Frontend
+Open a new terminal and navigate to the frontend folder:
+
+
+cd frontend
+npm install
+npm run dev 
+
+
+make sure you add your .env in both frontend and backend before run the project 
