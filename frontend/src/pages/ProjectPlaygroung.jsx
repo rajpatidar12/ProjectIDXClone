@@ -91,9 +91,25 @@ export const ProjectPlayground = () => {
             </div>
             <div>
               <div>
-                <Button onClick={fetchPort}>getport</Button>
+                <Button
+                  style={{
+                    backgroundColor: "#086fa6",
+                    color: "white",
+                    borderRadius: "20px",
+                  }}
+                  onClick={fetchPort}
+                >
+                  getport
+                </Button>
               </div>
-              <Button onClick={() => setLoadBrowser(true)}>
+              <Button
+                style={{
+                  backgroundColor: "#086fa6",
+                  color: "white",
+                  borderRadius: "20px",
+                }}
+                onClick={() => setLoadBrowser(true)}
+              >
                 Load my browser
               </Button>
               {loadBrowser && projectIdFromUrl && terminalSocket && (

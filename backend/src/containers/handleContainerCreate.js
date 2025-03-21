@@ -18,17 +18,18 @@ export const handleContainerCreate = async (
 ) => {
   try {
     //Delete any existing container running with the same name
+
+    // Delete any existing container running with same name
     const existingContainer = await docker.listContainers({
       name: projectId,
     });
 
-    console.log("Existing container:", existingContainer);
+    console.log("Existing container", existingContainer);
 
     if (existingContainer.length > 0) {
-      console.log("Container already exists,stopping and removing it");
+      console.log("Container already exists, stopping and removing it");
       const container = docker.getContainer(existingContainer[0].Id);
       await container.remove({ force: true });
-      console.log("Existing container removed");
     }
 
     const container = await docker.createContainer({
